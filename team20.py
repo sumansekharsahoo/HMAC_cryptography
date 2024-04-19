@@ -45,6 +45,43 @@ else:
 #     print("\t3. WITHDRAW AMOUNT")
 #     print("\t4. BALANCE ENQUIRY")
 #     print("\t5. TRANSFER AMOUNT")
+import hmac
+import hashlib
+import string
+import random
+
+class Register:
+    def __init__(self):
+        self.userInfo={}
+        self.secretKey=[]
+        
+    def generateSecretKey():
+        keysize=5
+        res = ''.join(random.choices(string.ascii_uppercase + string.digits, k=keysize))
+        print("The generated random string : " + str(res))
+while True:
+    print(
+       """ 
+    Select any one of the following : 
+        1 : Register
+        2 : Add block onto blockchain 
+        3 : View blockchain / transactions
+        4 : Buy a product (Client Request) 
+        5 : Deliver item (dist -> client)
+        6 : View Product Status (QR Code)
+        7 : View Pending orders
+        8 : Resolve Conflict (Client/Distributor Complaining about delivery of products)  
+        9 : View profile
+        0 : Exit
+    
+    """
+    )
+    choice= input('Enter choice')
+    if choice=='1':
+        uname= input("Enter your name: ")
+        
+    else:
+        print('error')
 #     print("\t6. ALL ACCOUNT HOLDER LIST")
 #     print("\t7. VIEW ALL TRANSACTIONS")
 #     print("\t8. EXIT")
@@ -90,3 +127,41 @@ else:
 #     else:
 #         print("Invalid choice")
 #         ch = input("Enter your choice : ")
+
+# import hmac
+# import hashlib
+# import string
+# import random
+
+# class Register:
+#     def __init__(self):
+#         self.userInfo={}
+#         self.secretKey=[]
+        
+#     def generateSecretKey():
+#         keysize=5
+#         res = ''.join(random.choices(string.ascii_uppercase + string.digits, k=keysize))
+#         print("The generated random string : " + str(res))
+# while True:
+#     print(
+#        """ 
+#     Select any one of the following : 
+#         1 : Register
+#         2 : Add block onto blockchain 
+#         3 : View blockchain / transactions
+#         4 : Buy a product (Client Request) 
+#         5 : Deliver item (dist -> client)
+#         6 : View Product Status (QR Code)
+#         7 : View Pending orders
+#         8 : Resolve Conflict (Client/Distributor Complaining about delivery of products)  
+#         9 : View profile
+#         0 : Exit
+    
+#     """
+#     )
+#     choice= input('Enter choice')
+#     if choice=='1':
+#         uname= input("Enter your name: ")
+        
+#     else:
+#         print('error')
