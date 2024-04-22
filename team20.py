@@ -168,8 +168,53 @@ class Blockchain:
         blk_dict["merkleroot"] = merkleroothash
         blk_dict["blockproducer"] = str(blkproducer)
         self.blockNotMined.append(blk_dict)
+        for j in tids:
+            self.blockchainedTransac[j] = self.verifiedTransac[j]
+            del self.verifiedTransac[j]
+        print("\nBlock created!\n")
+        ind = self.blockNotMined[len(self.blockNotMined) - 1]["index"]
+        mkrt = self.blockNotMined[len(self.blockNotMined) - 1]["merkleroot"]
+        tidsbnm = self.blockNotMined[len(self.blockNotMined) - 1]["trans_ID"]
+        bp = self.blockNotMined[len(self.blockNotMined) - 1]["blockproducer"]
+        blkmsg = f"""[
+        index: {ind}
+        merkleroot: {mkrt}
+        transaction_IDs: {tidsbnm}
+        blockproducer: {bp}
+]"""
+        return blkmsg
 
-    # def verifyTransaction(self,trans):
+    def printBlock(self, blk_dict):
+        ind = blk_dict["index"]
+        mkrt = blk_dict["merkleroot"]
+        tidsbnm = blk_dict["trans_ID"]
+        bp = blk_dict["blockproducer"]
+        phash = blk_dict["prevhash"]
+        hhash = blk_dict["hash"]
+        tstamp = blk_dict["timestamp"]
+        blkminer = blk_dict["blockminer"]
+        blkmsg = f"""[
+        index: {ind},
+        merkleroot: {mkrt},
+        transaction_IDs: {tidsbnm},
+        timestamp: {tstamp},
+        blockproducer: {bp},
+        blockminer: {blkminer},
+        prevhash: {phash},
+        hash: {hhash}
+]
+"""
+        return blkmsg
+
+    def mineBlock(self, blkminer, tstamp):
+        blk_dict = self.blockNotMined.pop(0)
+        blk_dict["prevhash"] = self.chain[len(self.chain) - 1]["hash"]
+        blk_dict["timestamp"] = tstamp
+        blk_dict["blockminer"] = blkminer
+        strforhash = blk_dict["prevhash"] + str(tstamp) + str(blkminer)
+        blk_dict["hash"] = str(hashlib.sha256(strforhash.encode()).hexdigest())
+        self.chain.append(blk_dict)
+        return self.printBlock(blk_dict)
 
 
 acc = Account()
@@ -397,13 +442,58 @@ while True:
             print("Invalid Account Number\n")
     elif choice == "6":
         print("\nCREATE/MINE BLOCK")
-        if len(blk.verifiedTransac) < 3:
-            print("\nMinimum of 3 transactions needed to create a block\n")
+        if len(blk.verifiedTransac) + len(blk.blockchainedTransac) < 3:
+            print("\nMinimum of 3 transactions needed to create/mine a block\n")
         else:
             ch = input("\n1: Create Block\n2: Mine Block\nSelect Action: ")
             if ch == "1":
-                login_account = random.randint(3001, acc_number)
-                print(f"\nAccountNo {login_account} is creating a block\n")
+                if len(blk.verifiedTransac) < 3:
+                    print("\nMinimum of 3 transactions needed to create a block\n")
+                else:
+                    login_account = random.randint(3001, acc_number - 1)
+                    print(f"\nAccountNo {login_account} is creating a block\n")
+                    skey = acc.userInfo[login_account]["secretkey"]
+                    chal = auth.generate_challenge()
+                    print(f"\nRandom challenge: {chal}")
+                    rbit = auth.generate_randomBit()
+                    print(f"Random bit: {rbit}")
+                    msghmac = auth.create_response(skey, rbit, chal, login_account)
+                    print(f"Response HMAC digest: {msghmac[1]}")
+                    verif = auth.verify_response(
+                        acc.userInfo[login_account]["secretkey"],
+                        rbit,
+                        chal,
+                        msghmac,
+                        msghmac[0],
+                    )
+                    print(f"Calculated HMAC digest: {verif[1]}")
+                    if verif[0]:
+                        print("Calculated HMAC matched with received response!")
+                        blkmsg = blk.createBlock(login_account)
+                        print(blkmsg)
+                    else:
+                        print("pasjndf allabsd msidilasdb")
+            elif ch == "2":
+                if len(blk.blockNotMined) == 0:
+                    print("Block is to be created first\n")
+                else:
+                    login_account = random.randint(3001, acc_number - 1)
+                    print(
+                        f"\nAccountNo {login_account} found out the Nonce first!\nAccountNo {login_account} is mining the block\n"
+                    )
+                    skey = acc.userInfo[login_account]["secretkey"]
+                    chal = auth.generate_challenge()
+                    print(f"\nRandom challenge: {chal}")
+                    rbit = auth.generate_randomBit()
+                    print(f"Random bit: {rbit}")
+                    msghmac = auth.create_response(skey, rbit, chal, login_account)
+                    print(f"Response HMAC digest: {msghmac[1]}")
+                    if verif[0]:
+                        print("Calculated HMAC matched with received response!")
+                        blkmsg = blk.mineBlock(login_account, time.time())
+                        print(blkmsg)
+                    else:
+                        print("pasjndf allabsd msidilasdb")
 
     elif choice == "7":
         ch = input(
@@ -412,14 +502,19 @@ while True:
         if ch == "2":
             print("\nVerified TransactionID List: ")
             for i in blk.verifiedTransac:
-                print(i)
-            if len(blk.verifiedTransac) == 0:
+                print(blk.verifiedTransac[i])
+            for i in blk.blockchainedTransac:
+                print(blk.blockchainedTransac[i])
+            if len(blk.verifiedTransac) + len(blk.blockchainedTransac) == 0:
                 print("NA\n")
             print("\nUnverified TransactionID List: ")
             for i in blk.pendingTranac:
-                print(i)
+                print(blk.pendingTranac[i])
             if len(blk.pendingTranac) == 0:
                 print("NA\n")
+        elif ch == "1":
+            for i in blk.chain:
+                print(blk.printBlock(i))
 
     elif choice == "8":
         print("\nVIEW USER TRANSACTIONS")
