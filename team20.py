@@ -211,7 +211,7 @@ class Blockchain:
         blk_dict["prevhash"] = self.chain[len(self.chain) - 1]["hash"]
         blk_dict["timestamp"] = tstamp
         blk_dict["blockminer"] = blkminer
-        strforhash = blk_dict["prevhash"] + str(tstamp) + str(blkminer)
+        strforhash = blk_dict["prevhash"] + str(tstamp) + str(blk_dict["merkleroot"])
         blk_dict["hash"] = str(hashlib.sha256(strforhash.encode()).hexdigest())
         self.chain.append(blk_dict)
         return self.printBlock(blk_dict)
@@ -443,12 +443,16 @@ while True:
     elif choice == "6":
         print("\nCREATE/MINE BLOCK")
         if len(blk.verifiedTransac) + len(blk.blockchainedTransac) < 3:
-            print("\nMinimum of 3 transactions needed to create/mine a block\n")
+            print(
+                "\nMinimum of 3 new verified transactions needed to create/mine a block\n"
+            )
         else:
             ch = input("\n1: Create Block\n2: Mine Block\nSelect Action: ")
             if ch == "1":
                 if len(blk.verifiedTransac) < 3:
-                    print("\nMinimum of 3 transactions needed to create a block\n")
+                    print(
+                        "\nMinimum of 3 verified transactions needed to create a block\n"
+                    )
                 else:
                     login_account = random.randint(3001, acc_number - 1)
                     print(f"\nAccountNo {login_account} is creating a block\n")
@@ -503,13 +507,16 @@ while True:
             print("\nVerified TransactionID List: ")
             for i in blk.verifiedTransac:
                 print(blk.verifiedTransac[i])
+                print("\n")
             for i in blk.blockchainedTransac:
                 print(blk.blockchainedTransac[i])
+                print("\n")
             if len(blk.verifiedTransac) + len(blk.blockchainedTransac) == 0:
                 print("NA\n")
             print("\nUnverified TransactionID List: ")
             for i in blk.pendingTranac:
                 print(blk.pendingTranac[i])
+                print("\n")
             if len(blk.pendingTranac) == 0:
                 print("NA\n")
         elif ch == "1":
